@@ -9,7 +9,6 @@ struct Location{
 struct Means{
     float x;
     float y;
-    int cluster;
 };
 struct Clusters{
     struct Location* locations;
@@ -70,14 +69,16 @@ void newMean(struct Clusters cl, int dotNums, int clusterNum){
 int main(){
     int testCase;
     scanf("%d", &testCase);
-    int itr;
-    struct Clusters *clusterArray;
-    clusterArray = (struct Clusters*)malloc(sizeof(struct Clusters)*testCase);
-    struct Location *locationArray;
-    locationArray = (struct Location*)malloc(sizeof(struct Location)*testCase);
-    struct Means *meanArray;
-    meanArray = (struct Means*)malloc(sizeof(struct Means)*testCase);
-    for(itr=0;itr<testCase;itr++){
+    // struct Clusters *clusterArray;
+    // clusterArray = (struct Clusters*)malloc(sizeof(struct Clusters)*testCase);
+    // struct Location *locationArray;
+    // locationArray = (struct Location*)malloc(sizeof(struct Location)*testCase);
+    // struct Means *meanArray;
+    // meanArray = (struct Means*)malloc(sizeof(struct Means)*testCase);
+    for(int itr=0;itr<testCase;itr++){
+        struct Clusters cluster;
+        struct Location *locationArray;
+        struct Means *meanArray;
         int alNum;
         scanf("%d", &alNum);
         int clusterNum;
@@ -87,7 +88,8 @@ int main(){
         scanf("%d", &dotNums);
         printf("%d \n",dotNums);
         int loc;
-        
+        locationArray = (struct Location*)malloc(sizeof(struct Location)*dotNums);
+        meanArray = (struct Means*)malloc(sizeof(struct Means)*clusterNum);
         for(loc=0;loc<dotNums;loc++){
             struct Location location;
             struct Means means;
@@ -97,7 +99,6 @@ int main(){
             if(loc<clusterNum){
                 means.x = x;
                 means.y = y;
-                means.cluster = loc;
                 meanArray[loc] = means;
             }
             location.x = x;
@@ -106,17 +107,19 @@ int main(){
             locationArray[loc] = location;
                  
         }
-        clusterArray[itr].locations = locationArray;
-        clusterArray[itr].means = meanArray;
+        cluster.locations = locationArray;
+        cluster.means = meanArray;
         for(int i = 0; i< alNum; i++){
             printf("%d 번째 \n", i);
-            clustering(clusterArray[itr],dotNums,clusterNum);
-            newMean(clusterArray[itr],dotNums,clusterNum);
+            clustering(cluster,dotNums,clusterNum);
+            newMean(cluster,dotNums,clusterNum);
         }
         printf("Test Case #%d \n", itr);
         for(int i = 0; i<dotNums;i++){
-            printf("%d \n",clusterArray[itr].locations[i].cluster);
+            printf("%d \n",cluster.locations[i].cluster);
         }
+        free(locationArray);
+        free(meanArray);
     }
     return 0;
 }
