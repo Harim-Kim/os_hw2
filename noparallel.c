@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include<time.h>
 struct Location{
     float x;
     float y;
@@ -35,7 +36,7 @@ void clustering(struct Clusters cl, int dotNums, int clusterNum){
                 least_distance = distance;
             }
         }
-        printf("%d dot(%f,%f) least distance: %f, cluster:%d \n",i,x,y, least_distance, cl.locations[i].cluster);
+        // printf("%d dot(%f,%f) least distance: %f, cluster:%d \n",i,x,y, least_distance, cl.locations[i].cluster);
     }
 };
 // k means clustering make new mean
@@ -69,6 +70,9 @@ void newMean(struct Clusters cl, int dotNums, int clusterNum){
 int main(){
     int testCase;
     scanf("%d", &testCase);
+
+    //for time check
+    clock_t start, end;
     // struct Clusters *clusterArray;
     // clusterArray = (struct Clusters*)malloc(sizeof(struct Clusters)*testCase);
     // struct Location *locationArray;
@@ -76,6 +80,7 @@ int main(){
     // struct Means *meanArray;
     // meanArray = (struct Means*)malloc(sizeof(struct Means)*testCase);
     for(int itr=0;itr<testCase;itr++){
+        
         struct Clusters cluster;
         struct Location *locationArray;
         struct Means *meanArray;
@@ -83,10 +88,8 @@ int main(){
         scanf("%d", &alNum);
         int clusterNum;
         scanf("%d", &clusterNum);
-        printf("%d ",clusterNum);
         int dotNums;
         scanf("%d", &dotNums);
-        printf("%d \n",dotNums);
         int loc;
         locationArray = (struct Location*)malloc(sizeof(struct Location)*dotNums);
         meanArray = (struct Means*)malloc(sizeof(struct Means)*clusterNum);
@@ -109,12 +112,18 @@ int main(){
         }
         cluster.locations = locationArray;
         cluster.means = meanArray;
+
+        //start time check
+        start = clock();
         for(int i = 0; i< alNum; i++){
-            printf("%d 번째 \n", i);
             clustering(cluster,dotNums,clusterNum);
             newMean(cluster,dotNums,clusterNum);
         }
+        //end time check
+        end = clock();
+        double result = (double)(end - start) /CLOCKS_PER_SEC;
         printf("Test Case #%d \n", itr);
+        printf("%lf microseconds\n", result*1000*1000);
         for(int i = 0; i<dotNums;i++){
             printf("%d \n",cluster.locations[i].cluster);
         }
