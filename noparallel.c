@@ -121,9 +121,10 @@ int main(){
         }
         //end time check
         end = clock();
-        double result = (double)(end - start) /CLOCKS_PER_SEC;
+        double result = (double)(end - start) /CLOCKS_PER_SEC*1000 *1000;
+        int resultime = (int)result;
         printf("Test Case #%d \n", itr);
-        printf("%lf microseconds\n", result*1000*1000);
+        printf("%d microseconds\n", resultime);
         for(int i = 0; i<dotNums;i++){
             printf("%d \n",cluster.locations[i].cluster);
         }
