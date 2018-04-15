@@ -175,7 +175,15 @@ int main(){
     //threads
     for(int i=0;i<testCase;i++){
         int thr;
+        struct timespec start,end;
+        clock_gettime(CLOCK_REALTIME, &start);
         thr = pthread_create(&p_thread[i], NULL, clusterCase, &teskInputs[i]);
+        clock_gettime(CLOCK_REALTIME, &end);
+        double result = (end.tv_sec - start.tv_sec) *1000000
+                        + (double)(end.tv_nsec - start.tv_nsec) 
+                        /1000;
+        long long int resultime = (long long int)(result);
+        printf("thread 생성시간: %lld \n", resultime);
     }
     for(int i=0;i<testCase;i++){
         pthread_join(p_thread[i], NULL);

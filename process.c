@@ -7,7 +7,8 @@
 #include <sys/ipc.h> 
 #include <sys/msg.h> 
 #include <sys/stat.h> 
-
+#include <errno.h>
+#include <string.h>
 struct Location{
     float x;
     float y;
@@ -21,13 +22,6 @@ struct Clusters{
     struct Location* locations;
     struct Means* means;
 };
-struct teskInput{
-    struct Clusters clusters;
-    int dotNums;
-    int clusterNum;
-    int alNum;
-    long long int clusteringTime ;
-};
 //output for process ipc
 struct Output{
     long msgtype;
@@ -37,9 +31,9 @@ struct Output{
 };
 struct DotOutput{
     long msgtype;
+    int cluster;
 };
-struct DotOutput{
-};
+
 // k means clustering using mean
 void clustering(struct Clusters cl, int dotNums, int clusterNum){
     float x;
@@ -111,7 +105,6 @@ int main(){
     key_t key_id;
     //get dot infos
     for(int itr=0;itr<testCase;itr++){
-        struct teskInput teskinput;
         struct Clusters cluster;
         //get infos
         int alNum;
@@ -146,19 +139,20 @@ int main(){
 
         cluster.locations = locationArray;
         cluster.means = meanArray;
-
-        //make teskInput
-        // output.dotNum = dotNums;
-        // output.locations = cluster.locations;
-        // teskinput.op = output;
-        // -------------------------------
-        // teskinput.clusters = cluster;
-        // teskinput.alNum = alNum;
-        // teskinput.dotNums = dotNums;W
-        // teskinput.clusterNum = clusterNum;
+        //make child process
+        struct timespec start,end;
+        clock_gettime(CLOCK_REALTIME, &start);
         pid = fork();
+        
         if(pid == 0){
-            key_id = msgget((key_t)itr+100,IPC_CREAT|0666);
+            clock_gettime(CLOCK_REALTIME, &end);
+            double resultp = (end.tv_sec - start.tv_sec) *1000000
+                            + (double)(end.tv_nsec - start.tv_nsec) 
+                            /1000;
+            long long int resultimep = (long long int)(resultp);
+            printf("process%d 생성시간: %lld \n",itr, resultimep);
+            fflush(stdout);
+            key_id = msgget((key_t)itr+1988,IPC_CREAT|0666);
             if(key_id == -1){
                 perror("msgget error");
                 exit(0);
@@ -180,10 +174,21 @@ int main(){
             mymsg.resultTime = resultime;
             mymsg.testCase = itr;
             if(msgsnd(key_id, (void *)&mymsg,sizeof(struct Output), 0)==-1){
-                perror("msg send error");
+                perror("msg send error\n");
+                printf("errorrrrrr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!%d\n", errno);
                 exit(0);
             }
-            printf("testCase: %d \n",itr);
+            // for(int i=0; i< dotNums; i++){
+            //     struct DotOutput dots;
+            //     memset(&dots,0x00,sizeof(dots));
+            //     dots.msgtype =2;
+            //     dots.cluster = locationArray[i].cluster;
+            //     if(msgsnd(key_id, (void *)&dots, sizeof(struct DotOutput), 0)==-1){
+            //         perror("msg send error");
+            //         printf("errorrrrrr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!%d\n", errno);
+            //         exit(0);
+            //     }
+            // }
             break;
         }else if(pid==1){
             perror("fork error:");
@@ -193,7 +198,7 @@ int main(){
     if(pid>0){
         for(int i=0; i< testCase; i++){
             struct Output getmymsg;
-            key_id = msgget(i+100,IPC_CREAT|0666);
+            key_id = msgget(i+1988,IPC_CREAT|0666);
             if(key_id < 0){
                 perror("msgget error");
                 exit(0);
@@ -202,10 +207,19 @@ int main(){
                 perror("msg get error");
                 exit(0);
             }
-            printf("%lld\n",getmymsg.resultTime);
-            for(int j=0;j<dotNums;j++){
-
-            }
+            printf("Test Case #%d \n",getmymsg.testCase);
+            fflush(stdout);
+            printf("%lld microseconds\n",getmymsg.resultTime);
+            fflush(stdout);
+            // for(int j=0;j<dotNums;j++){
+            //     struct DotOutput getDots;
+            //     if(msgrcv(key_id,(void *)&getDots, sizeof(struct DotOutput), 2, 0)==-1){
+            //         perror("msg get error");
+            //         exit(0);
+            //     }
+            //     printf("%d \n",getDots.cluster);
+            //     fflush(stdout);
+            // }
 
 
             if(msgctl(key_id, IPC_RMID,NULL)== -1){
@@ -213,12 +227,18 @@ int main(){
                 exit(1);
             } 
         }
-        
-    }
+    clock_gettime(CLOCK_REALTIME, &end_);
+    double result = (end_.tv_sec - start_.tv_sec) *1000000
+                      + (double)(end_.tv_nsec - start_.tv_nsec) 
+                      /1000;
+    long long int resultime = (long long int)(result);
+    printf("total timespend: %lld microsecond \n",(long long int)(result));
     
     // free memory
     free(locationArray);
-    free(meanArray);
+    free(meanArray);    
+    }
+    
     
     return 0;
 }
