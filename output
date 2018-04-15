@@ -1,21 +1,4 @@
-Test Case #0 
-0 microseconds
-0 
-0 
-0 
-0 
-0 
-Test Case #1 
-0 microseconds
-0 
-1 
-0 
-1 
-0 
-Test Case #2 
-0 microseconds
-0 
-1 
-2 
-3 
-4 
+testCase: 0 
+0 번째 dot1 번째 dot2 번째 dot3 번째 dot4 번째 dottestCase: 1 
+0 번째 dot1 번째 dot2 번째 dot3 번째 dot4 번째 dottestCase: 2 
+0 번째 dot1 번째 dot2 번째 dot3 번째 dot4 번째 dot

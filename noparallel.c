@@ -36,7 +36,6 @@ void clustering(struct Clusters cl, int dotNums, int clusterNum){
                 least_distance = distance;
             }
         }
-        // printf("%d dot(%f,%f) least distance: %f, cluster:%d \n",i,x,y, least_distance, cl.locations[i].cluster);
     }
 };
 // k means clustering make new mean
@@ -45,7 +44,9 @@ void newMean(struct Clusters cl, int dotNums, int clusterNum){
         float x_sum = 0;
         float y_sum = 0;
         int count = 0;
-        if(cl.means[i].x == 100000.0){
+
+        //skip if there is no dot in cluster
+        if(cl.means[i].x == 100001.0){
             continue;
         }
         for(int j=0;j<dotNums;j++){
@@ -55,9 +56,10 @@ void newMean(struct Clusters cl, int dotNums, int clusterNum){
                 y_sum = y_sum + cl.locations[j].y;
             }
         }
+        //if there is any dot in cluster make it unsual else calculate new cluster
         if(count == 0){
-            cl.means[i].x = 100000.0;
-            cl.means[i].y = 100000.0;
+            cl.means[i].x = 100001.0;
+            cl.means[i].y = 100001.0;
         }else{
             float new_x = x_sum / count;
             float new_y = y_sum / count;
@@ -66,19 +68,18 @@ void newMean(struct Clusters cl, int dotNums, int clusterNum){
         }
     }
 };
+
 // using input 
 int main(){
     int testCase;
     scanf("%d", &testCase);
-
-    //for time check
-    clock_t start, end;
-    // struct Clusters *clusterArray;
-    // clusterArray = (struct Clusters*)malloc(sizeof(struct Clusters)*testCase);
-    // struct Location *locationArray;
-    // locationArray = (struct Location*)malloc(sizeof(struct Location)*testCase);
-    // struct Means *meanArray;
-    // meanArray = (struct Means*)malloc(sizeof(struct Means)*testCase);
+    //total time spend
+    struct timespec start_;
+    clock_gettime(CLOCK_REALTIME, &start_);
+    //testcase time spend
+    struct timespec start, end;
+    
+    int sum = 0;
     for(int itr=0;itr<testCase;itr++){
         
         struct Clusters cluster;
@@ -114,22 +115,32 @@ int main(){
         cluster.means = meanArray;
 
         //start time check
-        start = clock();
+        
+        clock_gettime(CLOCK_REALTIME, &start);
         for(int i = 0; i< alNum; i++){
             clustering(cluster,dotNums,clusterNum);
             newMean(cluster,dotNums,clusterNum);
         }
         //end time check
-        end = clock();
-        double result = (double)(end - start) /CLOCKS_PER_SEC*1000 *1000;
-        int resultime = (int)result;
+        clock_gettime(CLOCK_REALTIME, &end);
+        double result = (end.tv_sec - start.tv_sec) * 1000000
+                      + (double)(end.tv_nsec - start.tv_nsec) 
+                      /1000;
         printf("Test Case #%d \n", itr);
-        printf("%d microseconds\n", resultime);
+        printf("%lld microseconds\n", (long long int)(result));
+        sum += result;
         for(int i = 0; i<dotNums;i++){
             printf("%d \n",cluster.locations[i].cluster);
         }
         free(locationArray);
         free(meanArray);
+        
     }
+    
+    double result = (end.tv_sec - start_.tv_sec) * 1000000
+                    + (double)(end.tv_nsec - start.tv_nsec) 
+                    /1000;
+    printf("total timespend: %lld microsecond \n",(long long int)(result));
+    printf("total algorithm time spend: %d \n", sum);
     return 0;
 }
